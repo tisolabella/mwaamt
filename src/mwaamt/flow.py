@@ -10,10 +10,10 @@ from scipy.stats import linregress
 from scipy.optimize import curve_fit
 from pathlib import Path
 
-from datahandle import data_read
-from funk import singlefit, doublefit
-from funk import set_resolution, get_chisq
-from funk import average, stddev, weighted_average
+from mwaamt.datahandle import data_read
+from mwaamt.funk import singlefit, doublefit
+from mwaamt.funk import set_resolution, get_chisq
+from mwaamt.funk import average, stddev, weighted_average
 
 
 
@@ -974,7 +974,4 @@ def run(configuration_file_path):
 
 #----- Execution function
 def cli_script():
-    try:
-        run(sys.argv[1])
-    except:
-        print("HOWTO: \nmmt <path_to_config_file>")
+    run(sys.argv[1])
