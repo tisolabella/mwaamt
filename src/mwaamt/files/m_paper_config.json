@@ -1,0 +1,27 @@
+{
+	"SECTION 1"             :       "PATHS",
+	"input file"		:	"/home/tom/dottorato/docu/Articoli miei/2023 toolkit/data/milano_no2_no7.csv",
+	"working directory"	:	"/home/tom/dottorato/docu/Articoli miei/2023 toolkit/data/results/milano_wb_before/",
+	
+	"SECTION 2"             :       "ANALYSIS SETTINGS",
+	"alpha bc swipe"	:	false,
+	"mass appo"		: 	false,
+	"plots"			: 	true,
+	"data type"		:	"Babs",
+	"additional"		:	["Levoglucosan"],
+	"wavelength error"	:	5.0,
+
+	"SECTION 3"		:	"PRE-FIT",
+	"presets"		:	["levoglucosan"],
+	"iterations"		:	10,
+	"threshold"		:	0.005,
+	"alpha BC"		:	1.0,
+	"alpha FF"		:	1.0,
+	"alpha WB"		:	1.7,
+
+	"SECTION 4"             :       "MASS APPORTIONMENT",
+	"AAE low"		:	0.9,
+	"AAE high"		:	1.5,
+	"k1"			: 	0.33,
+	"k2"			:	0.34
+}
