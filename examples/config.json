@@ -1,7 +1,7 @@
 {
 	"SECTION 1"             :       "PATHS",
-	"input file"		:	"../../examples/propata.csv",
-	"working directory"	:	"../../examples/results_prop/",
+	"input file"		:	"../../examples/example.csv",
+	"working directory"	:	"../../examples/results/",
 	
 	"SECTION 2"             :       "ANALYSIS SETTINGS",
 	"alpha bc swipe"	:	true,
