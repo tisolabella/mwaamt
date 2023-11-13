@@ -120,10 +120,9 @@ def run(configuration_file_path):
                         lambda_short =  min(prop.wavelength) 
                         BrC = B * lambda_short ** ( - alpha_BrC) 
                         BrC_set.append(BrC)
+                        levo_set.append(prop.Levoglucosan)
                     except Exception as e:
                         print(f'FIT ERROR for ALPHA_BC: {e}')
-                        BrC_set.append(0)
-                    levo_set.append(prop.Levoglucosan)
                 # Calculate regression and append R^2
                 try:
                     regression_res = linregress(levo_set, y=BrC_set)
@@ -178,10 +177,9 @@ def run(configuration_file_path):
                         lambda_long =  max(prop.wavelength) 
                         BC_WB = (A - A_p) * lambda_long ** ( - best_alpha_BC) 
                         BC_WB_set.append(BC_WB)
+                        levo_set.append(prop.Levoglucosan)
                     except Exception as e:
                         print(f'FIT ERROR for ALPHA_FF: {e}')
-                        BC_WB_set.append(0)
-                    levo_set.append(prop.Levoglucosan)
                 # Calculate regression and append R^2
                 try:
                     regression_res = linregress(levo_set, y=BC_WB_set)
@@ -234,10 +232,9 @@ def run(configuration_file_path):
                         lambda_long =  max(prop.wavelength) 
                         BC_WB = (A - A_p) * lambda_long ** ( - best_alpha_BC) 
                         BC_WB_set.append(BC_WB)
+                        levo_set.append(prop.Levoglucosan)
                     except Exception as e:
                         print(f'FIT ERROR for ALPHA_FF: {e}')
-                        BC_WB_set.append(0)
-                    levo_set.append(prop.Levoglucosan)
                 # Calculate regression and append R^2
                 try:
                     regression_res = linregress(levo_set, y=BC_WB_set)
@@ -953,6 +950,30 @@ def run(configuration_file_path):
         print(MISSING_KEYWORD, ke)
     except FileNotFoundError as fnfe:
         Path(cfg['working directory']).mkdir(parents=True, exist_ok=True)
+        with open(cfg['working directory'] + 'log.txt', 'w') as f:
+            print(f'---> Writing log file in {cfg["working directory"]}' + '\n') 
+            f.write('---------- GENERAL\n')
+            f.write(date_start_line)
+            f.write(date_end_line)
+            f.write(input_file_line)
+            f.write(output_folder_line)
+            f.write('\n---------- PREPROCESSING\n')
+            f.write(presets_line)
+            f.write(best_par_line)
+            f.write(saved_par_plots_line)
+            f.write('\n---------- FIT\n')
+            f.write(failed_fit_count_line)
+            f.write(failed_fit_line)
+            f.write(alpha_mean_line)
+            f.write(alpha_stddev_line)
+            f.write(saved_fit_plots_line)
+            f.write('\n---------- OPTICAL APPORTIONMENT\n')
+            f.write(saved_appo_plots_line)
+            if cfg['mass appo']:
+                f.write('\n---------- MASS APPORTIONMENT\n')
+                f.write(k1_line)
+                f.write(k2_line)
+                f.write(saved_reg_plots_line)
 
 
 
