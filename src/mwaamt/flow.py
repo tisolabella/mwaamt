@@ -151,7 +151,7 @@ def run(configuration_file_path):
             R_2_alpha_FF = []
             FF_correlation_pairs = {}
             for alpha_FF in alpha_FF_set:
-                alpha_FF = round(alpha_ff, 3) ## ROUNDING
+                alpha_FF = round(alpha_FF, 3) ## ROUNDING
                 # List to save the BC_WB(lambda_long) and levo
                 BC_WB_set, levo_set = [], []
                 # Fix the alpha BC value in a new function 
