@@ -101,6 +101,7 @@ def run(configuration_file_path):
             BC_correlation_pairs = {}
             for alpha_BC in alpha_BC_set:
                 # List to save the BrC(lambda_short) and levo
+                alpha_BC = round(alpha_BC, 3) ## ROUNDING
                 BrC_set, levo_set = [], []
                 # Fix the alpha BC value in a new function
                 def typefit(x, A, B, alpha_BrC):
@@ -114,8 +115,8 @@ def run(configuration_file_path):
                                 prop.abs, p0=(1e3, 1e10, 3),
                                 bounds=([1, 1, 1], [1e15, 1e15, 10]),
                                 sigma=prop.u_abs)
-                        B = fitres[0][1]
-                        alpha_BrC = fitres[0][2]
+                        B = round(fitres[0][1]) ## ROUNDING
+                        alpha_BrC = round(fitres[0][2], 3) ## ROUNDING
                         # Apportion BrC at the shortest wavelength
                         lambda_short =  min(prop.wavelength) 
                         BrC = B * lambda_short ** ( - alpha_BrC) 
@@ -140,7 +141,7 @@ def run(configuration_file_path):
             if R_2_alpha_BC[max_R2_index] - BC_correlation_pairs[best_alpha_BC] < cfg['threshold']:
                 pass # Do not change the value
             else:
-                best_alpha_BC = alpha_BC_set[max_R2_index]
+                best_alpha_BC = round(alpha_BC_set[max_R2_index], 3)
             #For the article
             #if iteration_number == cfg['iterations'] - 1: # Final lap
                 #print(f'alpha_BC {alpha_BC_set}\nR2 {R_2_alpha_BC}')
@@ -150,6 +151,7 @@ def run(configuration_file_path):
             R_2_alpha_FF = []
             FF_correlation_pairs = {}
             for alpha_FF in alpha_FF_set:
+                alpha_FF = round(alpha_ff, 3) ## ROUNDING
                 # List to save the BC_WB(lambda_long) and levo
                 BC_WB_set, levo_set = [], []
                 # Fix the alpha BC value in a new function 
@@ -171,8 +173,8 @@ def run(configuration_file_path):
                                 prop.abs, p0=(1e3, 1e10),
                                 bounds=([1, 1], [1e15, 1e15]),
                                 sigma=prop.u_abs)
-                        A = typefitres[0][0]
-                        A_p = sourcefitres[0][0]
+                        A = round(typefitres[0][0]) ## ROUNDING 
+                        A_p = round(sourcefitres[0][0]) ## ROUNDING  
                         # Apportion BC WB at the longest wavelength
                         lambda_long =  max(prop.wavelength) 
                         BC_WB = (A - A_p) * lambda_long ** ( - best_alpha_BC) 
@@ -195,7 +197,7 @@ def run(configuration_file_path):
             if R_2_alpha_FF[max_R2_index] - FF_correlation_pairs[best_alpha_FF] < cfg['threshold']:
                 pass # Do not change the value
             else:
-                best_alpha_FF = alpha_FF_set[max_R2_index]
+                best_alpha_FF = round(alpha_FF_set[max_R2_index], 3) ## ROUNDING 
             #For the article
             #if iteration_number == cfg['iterations'] - 1: # Final lap
                 #print(f'alpha_FF {alpha_FF_set}\nR2 {R_2_alpha_FF}')
@@ -205,6 +207,7 @@ def run(configuration_file_path):
             R_2_alpha_WB = []
             WB_correlation_pairs = {}
             for alpha_WB in alpha_WB_set:
+                alpha_WB = round(alpha_WB, 3) ## ROUNDING 
                 # List to save the BC_WB(lambda_long) and levo
                 BC_WB_set, levo_set = [], []
                 # Fix the alpha BC value in a new function 
@@ -226,8 +229,8 @@ def run(configuration_file_path):
                                 prop.abs, p0=(1e3, 1e10),
                                 bounds=([1, 1], [1e15, 1e15]),
                                 sigma=prop.u_abs)
-                        A = typefitres[0][0]
-                        A_p = sourcefitres[0][0]
+                        A = round(typefitres[0][0]) ## ROUNDING  
+                        A_p = round(sourcefitres[0][0]) ## ROUNDING 
                         # Apportion BC WB at the longest wavelength
                         lambda_long =  max(prop.wavelength) 
                         BC_WB = (A - A_p) * lambda_long ** ( - best_alpha_BC) 
@@ -252,7 +255,7 @@ def run(configuration_file_path):
             if R_2_alpha_WB[max_R2_index] - WB_correlation_pairs[best_alpha_WB] < cfg['threshold']:
                 pass # Do not change the value
             else:
-                best_alpha_WB = alpha_WB_set[max_R2_index]
+                best_alpha_WB = round(alpha_WB_set[max_R2_index], 3) ## ROUNDING 
             #For the article
             #if iteration_number == cfg['iterations'] - 1: # Final lap
                 #print(f'alpha_WB {alpha_WB_set}\nR2 {R_2_alpha_WB}')
@@ -381,8 +384,8 @@ def run(configuration_file_path):
                     bounds=([1, 1, 1], [1e15, 1e15, 10]),
                     sigma=prp.u_abs)
             # Save alpha_BrC
-            prp.alpha_brc = type_fitres[0][2]
-            prp.u_alpha_brc = np.sqrt(type_fitres[1][2][2])
+            prp.alpha_brc = round(type_fitres[0][2], 3) ## ROUNDING 
+            prp.u_alpha_brc = round(np.sqrt(type_fitres[1][2][2]), 3) ## ROUNDING 
             #------ Improved components fit
             def typefit_fix(x, A, B):
                 """Fix alpha BrC for uncertainty improvement"""
@@ -440,11 +443,11 @@ def run(configuration_file_path):
     print("---> Performing optical apportionment...\n")
     for sample in data:
         prp = sample.properties
-        A = prp.A
-        B = prp.B
-        A_p = prp.A_p
-        B_p = prp.B_p
-        alpha_BrC = prp.alpha_brc
+        A = round(prp.A) ## ROUNDING 
+        B = round(prp.B) ## ROUNDING 
+        A_p = round(prp.A_p) ## ROUNDING 
+        B_p = round(prp.B_p) ## ROUNDING 
+        alpha_BrC = round(prp.alpha_brc, 3) ## ROUNDING 
         prp.bc_wb, prp.bc_wb_frac = [], []
         prp.bc_ff, prp.bc_ff_frac = [], []
         prp.brc, prp.brc_frac = [], []
