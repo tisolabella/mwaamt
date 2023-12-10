@@ -1,0 +1,29 @@
+{
+	"SECTION 1"             :       "PATHS",
+	"input file"		:	"../../examples/propata.csv",
+	"working directory"	:	"../../examples/results_prop/",
+	
+	"SECTION 2"             :       "ANALYSIS SETTINGS",
+	"alpha bc swipe"	:	true,
+	"mass appo"		: 	true,
+	"plots"			: 	true,
+	"data type"		:	"Babs",
+	"additional"		:	["Levoglucosan"],
+	"wavelength error"	:	5.0,
+
+	"SECTION 3"		:	"PRE-FIT",
+	"presets"		:	["levoglucosan"],
+	"iterations"		:	3,
+	"threshold"		:	0.01,
+	"alpha BC"		:	1.0,
+	"alpha FF"		:	1.0,
+	"alpha WB"		:	2.0,
+
+	"SECTION 4"             :       "MASS APPORTIONMENT",
+	"AAE low"		:	0.9,
+	"AAE high"		:	1.5,
+	"k1"			: 	0.33,
+	"k2"			:	0.34
+}
+
+	
