@@ -329,9 +329,9 @@ if (levo.booked == TRUE) {
 
             if (file.exists(paste0(cfg$working.directory, "plots/preplots")) == FALSE) dir.create(paste0(cfg$working.directory, "plots/preplots"), recursive = TRUE)
             
-            levo.plot(cfg$working.directory, iter.number, best.alpha.BC, best.alpha.ff, best.alpha.wb, BC.correlation.pairs, ff.correlation.pairs, wb.correlation.pairs, alpha.BC.set, alpha.ff.set, alpha.wb.set, r2.alpha.bc, r2.alpha.ff, r2.alpha.wb) 
-
-
+            levo.plot(cfg$working.directory, iter.number, best.alpha.BC, best.alpha.ff, best.alpha.wb, BC.correlation.pairs, ff.correlation.pairs, wb.correlation.pairs,
+                      alpha.BC.set, alpha.ff.set, alpha.wb.set, r2.alpha.bc, r2.alpha.ff, r2.alpha.wb) 
+            
         }
     }
 
@@ -756,7 +756,9 @@ write.table(log, file = paste0(cfg$working.directory, 'log.txt'), append=TRUE, q
 
 if (cfg$plots == TRUE) {
 
+    ## ~~~~~~~~~~~~~~~~~ ##
     ## abs fitting plots ##
+    ## ~~~~~~~~~~~~~~~~~ ##
     if (file.exists(paste0(cfg$working.directory, "plots/fit_plots")) == FALSE) dir.create(paste0(cfg$working.directory, "plots/fit_plots"), recursive = TRUE)
     
     for (sample in data) {
@@ -764,37 +766,39 @@ if (cfg$plots == TRUE) {
         fitplot(wd = cfg$working.directory, sample, best.alpha.BC, best.alpha.ff, best.alpha.wb)
     }
 
+    ## ~~~~~~~~~~~~~~~~~~~~ ##
+    ## alpha.BrC swipe plot ##
+    ## ~~~~~~~~~~~~~~~~~~~~ ##
+    if(cfg$alpha.bc.swipe == TRUE){
+        
+        if (file.exists(paste0(cfg$working.directory, "plots/fit_plot")) == FALSE) dir.create(paste0(cfg$working.directory, "plots/"), recursive = TRUE)
+
+        swipe.plot(wd = cfg$working.directory, sw.alpha.BrC.set, sw.alpha.BrC.sd.set, sw.alpha.BC.set)
+    }
+
+    ## ~~~~~~~~~~~~~~~~~~~~~~~~~~ ##
+    ## alpha.BrC variability plot ##
+    ## ~~~~~~~~~~~~~~~~~~~~~~~~~~ ##
+
+    if (file.exists(paste0(cfg$working.directory, "plots/fit_plot")) == FALSE) dir.create(paste0(cfg$working.directory, "plots/"), recursive = TRUE)
     
+    brc.variability.plot(cfg$working.directory, data)
+    
+
+    ## ~~~~~~~~~~~~~~~~~~~~~~~~~~ ##
     ## optical apportionment plot ##
+    ## ~~~~~~~~~~~~~~~~~~~~~~~~~~ ##
     if (file.exists(paste0(cfg$working.directory, "plots/opt_app_plot")) == FALSE) dir.create(paste0(cfg$working.directory, "plots/opt_app_plots"), recursive = TRUE)
 
     opt.app.timeseries.plot(wd = cfg$working.directory, data, lambda.short, lambda.long)
 
-
+    ## ~~~~~~~~~~~~~~~~~~~~~~~ ##
     ## mass apportionment plot ##
-    if (file.exists(paste0(cfg$working.directory, "plots/mass_app_plot")) == FALSE) dir.create(paste0(cfg$working.directory, "plots/mass_app_plots"), recursive = TRUE)
+    ## ~~~~~~~~~~~~~~~~~~~~~~~ ##
 
-    mass.app.timeseries.plot(wd = cfg$working.directory, data)
-
-    ##
-    
-    ## for (sample in data) {
-
-    ## plot(, alpha, ylim = c(min(alpha - error), max(alpha + error)),
-    ##      xlab = "Sample Names", ylab = expression(alpha[BrC]),
-    ##      main = expression(paste("Error Bar Plot of ", alpha[BrC])),
-    ##      pch = 19, col = "red", xaxt = "n")  # xaxt = "n" to suppress x-axis ticks
-
-    ## arrows(x0 = seq_along(names), y0 = alpha - error, y1 = alpha + error,
-    ##        angle = 90, code = 3, length = 0.1, col = "red")
-
-    ## Rotating x-axis labels
-    ## axis(1, at = seq_along(names), labels = names, las = 2, cex.axis = 0.7)
-
-    ## Adding grid
-    ## grid(nx = NULL, ny = NULL, col = "lightgray", lty = 1)
-
-    ## Adjusting layout
-    ## par(mar = c(5, 4, 4, 2) + 0.1)
-
+    if(cfg$mass.appo == TRUE) {
+        if (file.exists(paste0(cfg$working.directory, "plots/mass_app_plot")) == FALSE) dir.create(paste0(cfg$working.directory, "plots/mass_app_plots"), recursive = TRUE)
+        
+        mass.app.timeseries.plot(wd = cfg$working.directory, data)
+    }
 }
