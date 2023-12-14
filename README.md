@@ -1,12 +1,12 @@
 # MWAAMT - MWAA Model Toolkit
 Source code for the toolkit presented in [1]. 
 
-## Installation instructions
+## Python instructions
 * Clone the git repository;
 * `cd` to the root `python/` directory;
 * run `python3 -m pip install .`
 
-## How to use
+### How to use
 After editing the configuration file to suit the specific analysis needs (see below for details), run `mmt <path-to-config-file>`.
 
 ## The configuration file
