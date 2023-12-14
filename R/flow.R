@@ -13,7 +13,7 @@ source("plots.R")
 ## ~~~~~~~~~~~~~~~~ ##
 
 ## read the configuration file
-config.file <- "example/m_paper_config.json"
+config.file <- "../../../R_debug/files/p_paper_config.json"
 
 ## Get the starting date and time
 start.time <- Sys.time()
