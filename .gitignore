@@ -1,1 +1,8 @@
 src/old/
+.*~
+*.~
+_*
+DS_Store
+~lock*
+.RData
+.Rhistory
