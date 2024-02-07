@@ -108,6 +108,7 @@ opt.app.timeseries.plot <- function(wd, data, lambda.short, lambda.long) {
                    mgp = c(2.5,1,0))
          )  ## BC FF
 
+
     grid(nx = NULL, ny = NULL, col = "lightgray", lty = 2, lwd = .75)
     
     with(dum, lines(1:length(unique(dum$name)), bc.wb, col = "forestgreen", lty = 1, lwd = .75, cex = .75, pch = 19, type = "o")) ## WB
@@ -142,6 +143,7 @@ mass.app.timeseries.plot <- function(wd, data) {
                    ylab = bquote(Concentration~(mu*g^-3)),
                    mgp = c(2.5,1,0))
          )  ## EC_FF
+
 
     grid(nx = NULL, ny = NULL, col = "lightgray", lty = 2, lwd = .75)
     
