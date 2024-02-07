@@ -41,11 +41,9 @@ fitplot <- function(wd, sample, babc, baff, bawb) {
     png( paste0(wd, "plots/fit_plots/", sample$name[1], ".png"), units = "cm", width = 18, height = 16, res = 150 )
     
     par(mar = c(4.5, 4, .5, .5))
-
     plot(sample$wavelength, sample$abs, pch = 19, cex = .3, ylim = range(0, sample$abs + sample$u.abs, sample$abs + sample$u.abs, na.rm = TRUE),
          xlab = "Wavelength (nm)", ylab = bquote(Absorption~coefficient~b[abs]~(Mm^-1)),
          mgp = c(2.5,1,0), type = "n")       
-
     with(sample, segments(wavelength - u.wavelength, abs, wavelength + u.wavelength, abs))
     with(sample, segments(wavelength, abs - u.abs, wavelength, abs + u.abs))
     points(sample$wavelength, sample$abs, pch = 19, cex = .5)
@@ -108,14 +106,12 @@ opt.app.timeseries.plot <- function(wd, data, lambda.short, lambda.long) {
                    mgp = c(2.5,1,0))
          )  ## BC FF
 
-
-    grid(nx = NULL, ny = NULL, col = "lightgray", lty = 2, lwd = .75)
-    
     with(dum, lines(1:length(unique(dum$name)), bc.wb, col = "forestgreen", lty = 1, lwd = .75, cex = .75, pch = 19, type = "o")) ## WB
 
     with(dum, lines(1:length(unique(dum$name)), brc, col = "darkorange", lty = 1, lwd = .75, cex = .75, pch = 19, type = "o")) ## brc
 
     axis(1, at = 1:length(unique(dum$name)), labels = unique(dum$name), las = 2)
+    grid()
 
     legend("topright", legend = c(bquote(BC[FF]~"@"~.(lambda.long)~nm), c(bquote(BC[WB]~"@"~.(lambda.long)~nm)), "BrC"),
            lty = 1, pch = 19, col = c("black", "forestgreen", "darkorange"),
@@ -144,9 +140,6 @@ mass.app.timeseries.plot <- function(wd, data) {
                    mgp = c(2.5,1,0))
          )  ## EC_FF
 
-
-    grid(nx = NULL, ny = NULL, col = "lightgray", lty = 2, lwd = .75)
-    
     with(dum, lines(1:length(unique(dum$name)), ec.wb, col = "forestgreen", lty = 1, lwd = .75, cex = .75, pch = 19, type = "o")) ## EC_WB
 
     with(dum, lines(1:length(unique(dum$name)), oc.ff, col = "darkorange", lty = 1, lwd = .75, cex = .75, pch = 19, type = "o")) ## brc
@@ -156,6 +149,7 @@ mass.app.timeseries.plot <- function(wd, data) {
     with(dum, lines(1:length(unique(dum$name)), oc.nc, col = "deepskyblue3", lty = 1, lwd = .75, cex = .75, pch = 19, type = "o")) ## brc
 
     axis(1, at = 1:length(unique(dum$name)), labels = unique(dum$name), las = 2)
+    grid()
 
     legend("topright", legend = c(bquote(EC[FF]), bquote(EC[WB]), bquote(OC[FF]), bquote(OC[WB]), bquote(OC[NC])),
            lty = 1, pch = 19, col = c("black", "forestgreen", "darkorange", "red", "deepskyblue3"),
@@ -165,57 +159,4 @@ mass.app.timeseries.plot <- function(wd, data) {
 
     dev.off()
 
-}
-
-
-swipe.plot <- function(wd, sabs, sabss, sabcs){
-
-    png( paste0(wd, "plots/fit_plots/swipe_brc.png"), units = "cm", width = 18, height = 16, res = 150 )
-
-    par(mar = c(4.5, 4, .5, .5))
-
-    plot(spline(sabcs, sabs), ylim = range(sabs + sabss, sabs - sabss, na.rm = TRUE),
-         xlab = bquote(alpha[BC]), ylab = bquote(alpha[BrC]~average~across~all~samples),
-         type = "n", col = "red", mgp = c(2.5, 1, 0))
-
-    ## Adding grid
-    grid(nx = NULL, ny = NULL, col = "lightgray", lty = 2, lwd = .75)
-
-    spline(rev(sabcs), rev(sabs - sabss)) %>%
-        data.frame(.) %>%
-        arrange(desc(x)) %>%        
-        rbind.data.frame(spline(sabcs, c(sabs + sabss)), .) %>%
-        polygon(., col = rgb(matrix(col2rgb("red")/255,ncol=3), alpha = 0.5, maxColorValue = 1), border = rgb(matrix(col2rgb("red")/255, ncol = 3), alpha = 0.5, maxColorValue = 1))
-
-    lines(spline(sabcs, sabs), ylim = range(sabs + sabss, sabs - sabss, na.rm = TRUE),
-         type = "l", col = "red")
-  
-    legend("topleft", legend = c(bquote(alpha[BrC]~average), bquote(alpha[BrC]~1*sigma)),
-           lty = 1, lwd = c(1, 6), col = c("red", rgb(matrix(col2rgb("red")/255,ncol=3), alpha = 0.5, maxColorValue = 1)), bty = "n")
-    
-    dev.off()
-    
-}
-
-brc.variability.plot <- function(wd, data){
-
-    dum <- dplyr::bind_rows(data) %>%
-        dplyr::select(matches("name|alpha.brc")) %>% ## keep columns needed for plot
-        dplyr::distinct(.) ## remove duplicates
-
-    png( paste0(wd, "plots/fit_plots/brc_variability.png"), units = "cm", width = 18, height = 16, res = 150 )
-
-    par(mar = c(4.5, 4, .5, .5))
-    
-    plot(1:nrow(dum), dum$alpha.brc, ylim = range(dum$alpha.brc + dum$u.alpha.brc, dum$alpha.brc - dum$u.alpha.brc, na.rm = TRUE), xlab = "", ylab = bquote(alpha[BrC]~"\U00B1"~1*sigma), type = "p", col = "red", mgp = c(2.5, 1, 0), pch = 19, xaxt = "n")
-
-    segments(1:length(dum), dum$alpha.brc - dum$u.alpha.brc, 1:length(dum), dum$alpha.brc + dum$u.alpha.brc, col = "red", lwd = .75)
-    
-    axis(1, at = 1:length(unique(dum$name)), labels = unique(dum$name), las = 2)
-    mtext("Sample name", 1, 3.2)
-
-    ## Adding grid
-    grid(nx = NULL, ny = NULL, col = "lightgray", lty = 2, lwd = .75)
-    
-    dev.off()
 }
