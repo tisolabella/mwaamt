@@ -75,6 +75,7 @@ class Property():
         b_p (float)
         u_b_p (float)
         chisq_source_fit (float)
+        failed (bool)
 
         # From the optical apportionment
         brc (list, corresponding to wavelength)

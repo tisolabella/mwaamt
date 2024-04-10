@@ -38,7 +38,7 @@ def run(configuration_file_path):
     # CONSTANTS & PRINTOUT STRINGS
     #####################################################################
     MISSING_KEYWORD = "ERROR: keyword not present in the configuration file"
-
+    FIT_ERROR = "ERROR during non-linear fit of sample "
 
 
 
@@ -112,7 +112,7 @@ def run(configuration_file_path):
                     # Do fit
                     try:
                         fitres = curve_fit(typefit, prop.wavelength,
-                                prop.abs, p0=(1e3, 1e10, 3),
+                                prop.abs, p0=(1e2, 1e5, 3),
                                 bounds=([1, 1, 1], [1e15, 1e15, 10]),
                                 sigma=prop.u_abs)
                         B = round(fitres[0][1]) ## ROUNDING
@@ -123,7 +123,9 @@ def run(configuration_file_path):
                         BrC_set.append(BrC)
                         levo_set.append(prop.Levoglucosan)
                     except Exception as e:
-                        print(f'FIT ERROR for ALPHA_BC: {e}')
+                        print(f'FIT ERROR for ALPHA_BC: {e}.')
+                        if cfg['verbose']:
+                            print(f'Sample {sample.name}, alpha_BC = {alpha_BC}, alpha_FF = {alpha_FF}, alpha_WB = {alpha_WB}')
                 # Calculate regression and append R^2
                 try:
                     regression_res = linregress(levo_set, y=BrC_set)
@@ -135,6 +137,8 @@ def run(configuration_file_path):
                     print(f'REGRESSION ERROR for ALPHA BC: {e}')
                     R_2_alpha_BC.append(0)
                     BC_correlation_pairs[alpha_BC] = 0
+                    if cfg['verbose']:
+                            print(f'Sample {sample.name}, alpha_BC = {alpha_BC}, alpha_FF = {alpha_FF}, alpha_WB = {alpha_WB}')
             max_R2_index = R_2_alpha_BC.index(max(R_2_alpha_BC))
             # For stability, use the best only if its significantly
             # better than the previous best:
@@ -181,7 +185,9 @@ def run(configuration_file_path):
                         BC_WB_set.append(BC_WB)
                         levo_set.append(prop.Levoglucosan)
                     except Exception as e:
-                        print(f'FIT ERROR for ALPHA_FF: {e}')
+                        print(f'FIT ERROR for ALPHA_FF: {e}.')
+                        if cfg['verbose']:
+                            print(f'Sample {sample.name}, alpha_BC = {alpha_BC}, alpha_FF = {alpha_FF}, alpha_WB = {alpha_WB}')
                 # Calculate regression and append R^2
                 try:
                     regression_res = linregress(levo_set, y=BC_WB_set)
@@ -191,6 +197,8 @@ def run(configuration_file_path):
                     print(f'REGRESSION ERROR for ALPHA FF: {e}')
                     R_2_alpha_FF.append(0)
                     FF_correlation_pairs[alpha_FF] = 0
+                    if cfg['verbose']:
+                            print(f'Sample {sample.name}, alpha_BC = {alpha_BC}, alpha_FF = {alpha_FF}, alpha_WB = {alpha_WB}')
             max_R2_index = R_2_alpha_FF.index(max(R_2_alpha_FF))
             # For stability, use the best only if its significantly
             # better than the previous best:
@@ -237,7 +245,9 @@ def run(configuration_file_path):
                         BC_WB_set.append(BC_WB)
                         levo_set.append(prop.Levoglucosan)
                     except Exception as e:
-                        print(f'FIT ERROR for ALPHA_FF: {e}')
+                        print(f'FIT ERROR for ALPHA_WB: {e}.')
+                        if cfg['verbose']:
+                            print(f'Sample {sample.name}, alpha_BC = {alpha_BC}, alpha_FF = {alpha_FF}, alpha_WB = {alpha_WB}')
                 # Calculate regression and append R^2
                 try:
                     regression_res = linregress(levo_set, y=BC_WB_set)
@@ -249,6 +259,8 @@ def run(configuration_file_path):
                     print(f'REGRESSION ERROR for ALPHA WB: {e}')
                     R_2_alpha_WB.append(0)
                     WB_correlation_pairs[alpha_WB] = 0
+                    if cfg['verbose']:
+                            print(f'Sample {sample.name}, alpha_BC = {alpha_BC}, alpha_FF = {alpha_FF}, alpha_WB = {alpha_WB}')
             max_R2_index = R_2_alpha_WB.index(max(R_2_alpha_WB))
             # For stability, use the best only if its significantly
             # better than the previous best:
@@ -318,7 +330,7 @@ def run(configuration_file_path):
                         """Fix alpha BC to the best value"""
                         return doublefit(x, A, abc, B, alpha_BrC)
                     type_fitres = curve_fit(typefit, prp.wavelength,
-                            prp.abs, p0=(1e3, 1e10, 3),
+                            prp.abs, p0=(1e4, 1e9, 3),
                             bounds=([1, 1, 1], [1e15, 1e15, 10]),
                             sigma=prp.u_abs,
                             maxfev=1e4)
@@ -348,6 +360,7 @@ def run(configuration_file_path):
 
         #--------- AAE fit
         prp = sample.properties
+        prp.failed = False
         try:
             aae_fitres = curve_fit(singlefit, prp.wavelength,
                     prp.abs, p0=(1e5, 1), bounds=([1,0.5], [1e15, 3]),
@@ -370,9 +383,10 @@ def run(configuration_file_path):
             tmp, prp.red_chisq_aae_fit = get_chisq(prp.abs, expected,
                     prp.u_abs, ndf)
         except RuntimeError as re:
-            print(FIT_ERROR, re)
+            prp.failed = True
+            print(FIT_ERROR, sample.name,'->', re)
             failed_fit_count += 1
-            failed_fit.append(['aae', f'sample {sample.name}'])
+            failed_fit.append(['AAE fit', f'sample {sample.name}'])
 
         #--------- Components fit
         def typefit(x, A, B, alpha_BrC):
@@ -380,7 +394,7 @@ def run(configuration_file_path):
             return doublefit(x, A, alpha_BC, B, alpha_BrC)
         try:
             type_fitres = curve_fit(typefit, prp.wavelength,
-                    prp.abs, p0=(1e3, 1e10, 3),
+                    prp.abs, p0=(1e2, 1e5, 3),
                     bounds=([1, 1, 1], [1e15, 1e15, 10]),
                     sigma=prp.u_abs)
             # Save alpha_BrC
@@ -391,7 +405,7 @@ def run(configuration_file_path):
                 """Fix alpha BrC for uncertainty improvement"""
                 return typefit(x, A, B, prp.alpha_brc)
             second_type_fitres = curve_fit(typefit_fix, prp.wavelength,
-                    prp.abs, p0=(1e3, 1e10),
+                    prp.abs, p0=(1e2, 1e5),
                     bounds=([1, 1], [1e15, 1e15]),
                     sigma=prp.u_abs)
             prp.A = type_fitres[0][0]
@@ -404,9 +418,10 @@ def run(configuration_file_path):
             tmp, prp.red_chisq_type_fit = get_chisq(prp.abs, expected,
                     prp.u_abs, ndf)
         except RuntimeError as re:
-            print(FIT_ERROR, re)
+            prp.failed = True
+            print(FIT_ERROR, sample.name,'->', re)
             failed_fit_count += 1
-            failed_fit.append(['type', f'sample {sample.name}'])
+            failed_fit.append(['Type fit', f'sample {sample.name}'])
 
         #---- Source fit
         def sourcefit(x, A_p, B_p):
@@ -427,9 +442,10 @@ def run(configuration_file_path):
             tmp, prp.red_chisq_source_fit = get_chisq(prp.abs, expected,
                     prp.u_abs, ndf)
         except RuntimeError as re:
-            print(FIT_ERROR, re)
+            prp.failed = True
+            print(FIT_ERROR, sample.name,'->', re)
             failed_fit_count += 1
-            failed_fit.append(['source', f'sample {sample.name}'])
+            failed_fit.append(['Source fit', f'sample {sample.name}'])
 
 
 
@@ -443,27 +459,32 @@ def run(configuration_file_path):
     print("---> Performing optical apportionment...\n")
     for sample in data:
         prp = sample.properties
-        A = round(prp.A) ## ROUNDING 
-        B = round(prp.B) ## ROUNDING 
-        A_p = round(prp.A_p) ## ROUNDING 
-        B_p = round(prp.B_p) ## ROUNDING 
-        alpha_BrC = round(prp.alpha_brc, 3) ## ROUNDING 
-        prp.bc_wb, prp.bc_wb_frac = [], []
-        prp.bc_ff, prp.bc_ff_frac = [], []
-        prp.brc, prp.brc_frac = [], []
-        for w, a in zip(prp.wavelength, prp.abs):
-            #--- BC wood burning
-            value = (A - A_p) / (w ** alpha_BC)
-            prp.bc_wb.append(value)
-            prp.bc_wb_frac.append(value / a)
-            #--- BC fossil fuel
-            value = A_p / (w ** alpha_FF)
-            prp.bc_ff.append(value)
-            prp.bc_ff_frac.append(value / a)
-            #--- BrC 
-            value = B / (w ** alpha_BrC)
-            prp.brc.append(value)
-            prp.brc_frac.append(value / a)
+        if not prp.failed:
+            # Perform apportionment for the succesful fits
+            A = round(prp.A) ## ROUNDING 
+            B = round(prp.B) ## ROUNDING 
+            A_p = round(prp.A_p) ## ROUNDING 
+            B_p = round(prp.B_p) ## ROUNDING 
+            alpha_BrC = round(prp.alpha_brc, 3) ## ROUNDING 
+            prp.bc_wb, prp.bc_wb_frac = [], []
+            prp.bc_ff, prp.bc_ff_frac = [], []
+            prp.brc, prp.brc_frac = [], []
+            for w, a in zip(prp.wavelength, prp.abs):
+                #--- BC wood burning
+                value = (A - A_p) / (w ** alpha_BC)
+                prp.bc_wb.append(value)
+                prp.bc_wb_frac.append(value / a)
+                #--- BC fossil fuel
+                value = A_p / (w ** alpha_FF)
+                prp.bc_ff.append(value)
+                prp.bc_ff_frac.append(value / a)
+                #--- BrC 
+                value = B / (w ** alpha_BrC)
+                prp.brc.append(value)
+                prp.brc_frac.append(value / a)
+        else:
+            # Skip the apportionment for the failed fits
+            pass
 
                  
 
@@ -487,13 +508,16 @@ def run(configuration_file_path):
         #--- EC apportionment
         for sample in data:
             prp = sample.properties
-            # Get the longest and shortest wavelengths
-            # in case the list is not in order
-            lambda_long = max(prp.wavelength)
-            i_l = prp.wavelength.index(lambda_long)
-            # Apportion EC
-            prp.ec_ff = prp.ec * (prp.bc_ff[i_l] / (prp.abs[i_l] - prp.brc[i_l]))
-            prp.ec_wb = prp.ec * (prp.bc_wb[i_l] / (prp.abs[i_l] - prp.brc[i_l]))
+            if not prp.failed:
+                # Get the longest and shortest wavelengths
+                # in case the list is not in order
+                lambda_long = max(prp.wavelength)
+                i_l = prp.wavelength.index(lambda_long)
+                # Apportion EC
+                prp.ec_ff = prp.ec * (prp.bc_ff[i_l] / (prp.abs[i_l] - prp.brc[i_l]))
+                prp.ec_wb = prp.ec * (prp.bc_wb[i_l] / (prp.abs[i_l] - prp.brc[i_l]))
+            else:
+                pass
         #--- OC apportionment
         # Create and populate the lists for the fits
         k1_list, k2_list = [], []
@@ -501,16 +525,19 @@ def run(configuration_file_path):
         k2_x, k2_y = [], []
         for sample in data:
             prp = sample.properties
-            # Get the longest and shortest wavelengths
-            # in case the list is not in order
-            lambda_long = max(prp.wavelength)
-            i_l = prp.wavelength.index(lambda_long)
-            if prp.aae < cfg['AAE high'] and prp.aae > cfg['AAE low']:
-                k1_list.append(sample)
-                k1_x.append(prp.bc_ff[i_l])
-                k1_y.append(prp.oc)
+            if not prp.failed:
+                # Get the longest and shortest wavelengths
+                # in case the list is not in order
+                lambda_long = max(prp.wavelength)
+                i_l = prp.wavelength.index(lambda_long)
+                if prp.aae < cfg['AAE high'] and prp.aae > cfg['AAE low']:
+                    k1_list.append(sample)
+                    k1_x.append(prp.bc_ff[i_l])
+                    k1_y.append(prp.oc)
+                else:
+                    k2_list.append(sample)
             else:
-                k2_list.append(sample)
+                pass
         # Perform fit if needed
         if do_fit:
             fit_1 = linregress(k1_x, y=k1_y)
@@ -520,16 +547,22 @@ def run(configuration_file_path):
         # Calculate OC_FF for all samples using the k1 just found
         for sample in data:
             prp = sample.properties
-            lambda_long = max(prp.wavelength)
-            i_l = prp.wavelength.index(lambda_long)
-            prp.oc_ff = k1 * prp.bc_ff[i_l]
+            if not prp.failed:
+                lambda_long = max(prp.wavelength)
+                i_l = prp.wavelength.index(lambda_long)
+                prp.oc_ff = k1 * prp.bc_ff[i_l]
+            else:
+                pass
         # Create the x and y lists for the second regression
         for sample in k2_list:
             prp = sample.properties
-            lambda_short = min(prp.wavelength)
-            i_s = prp.wavelength.index(lambda_short)
-            k2_x.append(prp.brc[i_s])
-            k2_y.append(prp.oc - prp.oc_ff)
+            if not prp.failed:
+                lambda_short = min(prp.wavelength)
+                i_s = prp.wavelength.index(lambda_short)
+                k2_x.append(prp.brc[i_s])
+                k2_y.append(prp.oc - prp.oc_ff)
+            else:
+                pass
         # Perform fit if needed
         if do_fit:
             fit_2 = linregress(k2_x, y=k2_y)
@@ -539,11 +572,14 @@ def run(configuration_file_path):
         # Calculate OC_WB and OC_NC for all samples using the k1 just found
         for sample in data:
             prp = sample.properties
-            lambda_short = min(prp.wavelength)
-            i_s = prp.wavelength.index(lambda_short)
-            prp.oc_wb = k2 * prp.brc[i_s]
-            #input(f'name {sample.name} lambda_short {lambda_short} brc {prp.brc[i_s]} k2 {k2} oc_wb {prp.oc_wb}')
-            prp.oc_nc = prp.oc - prp.oc_ff - prp.oc_wb
+            if not prp.failed:
+                lambda_short = min(prp.wavelength)
+                i_s = prp.wavelength.index(lambda_short)
+                prp.oc_wb = k2 * prp.brc[i_s]
+                #input(f'name {sample.name} lambda_short {lambda_short} brc {prp.brc[i_s]} k2 {k2} oc_wb {prp.oc_wb}')
+                prp.oc_nc = prp.oc - prp.oc_ff - prp.oc_wb
+            else:
+                pass
 
 
 
@@ -564,12 +600,15 @@ def run(configuration_file_path):
             writa.writerow(header)
             for sample in data:
                 prp = sample.properties
-                linetowrite = [sample.name, prp.scale, prp.u_scale, 
-                        prp.aae, prp.u_aae, prp.red_chisq_aae_fit, 
-                        prp.A, prp.u_A, prp.B, prp.u_B, prp.alpha_brc,
-                        prp.u_alpha_brc, prp.red_chisq_type_fit, 
-                        prp.A_p, prp.u_A_p, prp.B_p, prp.u_B_p, 
-                        prp.red_chisq_source_fit]
+                if not prp.failed:
+                    linetowrite = [sample.name, prp.scale, prp.u_scale, 
+                            prp.aae, prp.u_aae, prp.red_chisq_aae_fit, 
+                            prp.A, prp.u_A, prp.B, prp.u_B, prp.alpha_brc,
+                            prp.u_alpha_brc, prp.red_chisq_type_fit, 
+                            prp.A_p, prp.u_A_p, prp.B_p, prp.u_B_p, 
+                            prp.red_chisq_source_fit]
+                else:
+                    linetowrite = [sample.name, "non-linear fit failed"]
                 writa.writerow(linetowrite) 
     except KeyError as ke:
         print(MISSING_KEYWORD, ke)
@@ -610,16 +649,19 @@ def run(configuration_file_path):
             for sample in data:
                 prp = sample.properties
                 line_to_write = [sample.name,]
-                zippo = zip(prp.bc_ff_frac, prp.bc_wb_frac, prp.brc_frac)
-                for bcff_frac, bcwb_frac, brc_frac in zippo:
-                    line_to_write.append(bcff_frac)
-                    line_to_write.append(bcwb_frac)
-                    line_to_write.append(brc_frac)
-                zippo = zip(prp.bc_ff, prp.bc_wb, prp.brc)
-                for bcff, bcwb, brc in zippo:
-                    line_to_write.append(bcff)
-                    line_to_write.append(bcwb)
-                    line_to_write.append(brc)
+                if not prp.failed:
+                    zippo = zip(prp.bc_ff_frac, prp.bc_wb_frac, prp.brc_frac)
+                    for bcff_frac, bcwb_frac, brc_frac in zippo:
+                        line_to_write.append(bcff_frac)
+                        line_to_write.append(bcwb_frac)
+                        line_to_write.append(brc_frac)
+                    zippo = zip(prp.bc_ff, prp.bc_wb, prp.brc)
+                    for bcff, bcwb, brc in zippo:
+                        line_to_write.append(bcff)
+                        line_to_write.append(bcwb)
+                        line_to_write.append(brc)
+                else:
+                    line_to_write.append("non-linear fit failed")
                 writa.writerow(line_to_write)
     except KeyError as ke:
         print(MISSING_KEYWORD, ke)
@@ -647,11 +689,14 @@ def run(configuration_file_path):
                 for sample in data:
                     prp = sample.properties
                     line_to_write = [sample.name,]
-                    line_to_write.append(prp.ec_ff)
-                    line_to_write.append(prp.ec_wb)
-                    line_to_write.append(prp.oc_ff)
-                    line_to_write.append(prp.oc_wb)
-                    line_to_write.append(prp.oc_nc)
+                    if not prp.failed:
+                        line_to_write.append(prp.ec_ff)
+                        line_to_write.append(prp.ec_wb)
+                        line_to_write.append(prp.oc_ff)
+                        line_to_write.append(prp.oc_wb)
+                        line_to_write.append(prp.oc_nc)
+                    else:
+                        line_to_write.append("non-linear fit failed")
                     writa.writerow(line_to_write)
         except KeyError as ke:
             print(MISSING_KEYWORD, ke)
@@ -675,27 +720,28 @@ def run(configuration_file_path):
                       xerr=prp.u_wavelength, yerr=prp.u_abs,
                       fmt='.k', elinewidth=0.8, markersize=1.2,
                       label=f'data {sample.name}')
-                x = np.linspace(prp.wavelength[0], prp.wavelength[-1], 500)
-                # Type fit
-                ytype = typefit_fix(x, prp.A, prp.B)
-                plt.plot(x, ytype, 'r', 
-                      label='Component fit (BC + BrC)')
-                ybc = singlefit(x, prp.A, alpha_BC)
-                plt.plot(x, ybc, 'k', linewidth=0.5,
-                      label='BC contribution')
-                ybrc = singlefit(x, prp.B, prp.alpha_brc)
-                plt.plot(x, ybrc, 'y', linewidth=0.5,
-                        label='BrC contribution')
-                # Source fit
-                ysource = sourcefit(x, prp.A_p, prp.B_p)
-                plt.plot(x, ysource, 'b', linestyle='dashed', 
-                      label='Source fit (FF + WB)')
-                yff = singlefit(x, prp.A_p, alpha_FF)
-                plt.plot(x, yff, 'm', linewidth=0.5, linestyle='dashed',
-                      label='FF contribution')
-                ywb = singlefit(x, prp.B_p, alpha_WB)
-                plt.plot(x, ywb, 'g', linewidth=0.5, linestyle='dashed',
-                        label='WB contribution')
+                if not prp.failed:
+                    x = np.linspace(prp.wavelength[0], prp.wavelength[-1], 500)
+                    # Type fit
+                    ytype = typefit_fix(x, prp.A, prp.B)
+                    plt.plot(x, ytype, 'r', 
+                          label='Component fit (BC + BrC)')
+                    ybc = singlefit(x, prp.A, alpha_BC)
+                    plt.plot(x, ybc, 'k', linewidth=0.5,
+                          label='BC contribution')
+                    ybrc = singlefit(x, prp.B, prp.alpha_brc)
+                    plt.plot(x, ybrc, 'y', linewidth=0.5,
+                            label='BrC contribution')
+                    # Source fit
+                    ysource = sourcefit(x, prp.A_p, prp.B_p)
+                    plt.plot(x, ysource, 'b', linestyle='dashed', 
+                          label='Source fit (FF + WB)')
+                    yff = singlefit(x, prp.A_p, alpha_FF)
+                    plt.plot(x, yff, 'm', linewidth=0.5, linestyle='dashed',
+                          label='FF contribution')
+                    ywb = singlefit(x, prp.B_p, alpha_WB)
+                    plt.plot(x, ywb, 'g', linewidth=0.5, linestyle='dashed',
+                            label='WB contribution')
                 plt.xlabel('Wavelength [nm]')
                 plt.ylabel(r'Absorption coefficient, $b_{abs}$  ' + '[Mm'+ r'$^{-1}$' + ']') if prp.data_type == 'Babs' else plt.ylabel('100 ABS')
                 plt.grid(alpha=0.3)
@@ -719,9 +765,10 @@ def run(configuration_file_path):
             alpha, error, names = [], [], []
             for sample in data:
                 prp = sample.properties
-                alpha.append(prp.alpha_brc)
-                error.append(prp.u_alpha_brc)
-                names.append(sample.name)
+                if not prp.failed:
+                    alpha.append(prp.alpha_brc)
+                    error.append(prp.u_alpha_brc)
+                    names.append(sample.name)
             fig, ax = plt.subplots() 
             ax.errorbar(names, alpha, xerr=None, yerr=error, fmt='.r')
             ax.set_xticklabels(names, rotation=75)
@@ -779,13 +826,14 @@ def run(configuration_file_path):
             i_long = data[0].properties.wavelength.index(lambda_long)
             for sample in data:
                 prp = sample.properties
-                brc_short.append(prp.brc[i_short])
-                bc_wb_short.append(prp.bc_wb[i_short])
-                bc_ff_short.append(prp.bc_ff[i_short])
-                bc_ff_long.append(prp.bc_ff[i_long])
-                bc_wb_long.append(prp.bc_wb[i_long])
-                brc_long.append(prp.brc[i_long])
-                names.append(sample.name)
+                if not prp.failed:
+                    brc_short.append(prp.brc[i_short])
+                    bc_wb_short.append(prp.bc_wb[i_short])
+                    bc_ff_short.append(prp.bc_ff[i_short])
+                    bc_ff_long.append(prp.bc_ff[i_long])
+                    bc_wb_long.append(prp.bc_wb[i_long])
+                    brc_long.append(prp.brc[i_long])
+                    names.append(sample.name)
             fig1, ax1 = plt.subplots() # For short lambda
             fig2, ax2 = plt.subplots() # For long lambda
             ax1.plot(names, bc_ff_short, '-g', label=r'BC$_{FF}$'+ f'@ {lambda_short} nm')
@@ -862,12 +910,13 @@ def run(configuration_file_path):
             oc_ff, oc_wb, oc_nc, ec_ff, ec_wb, names = [], [], [], [], [], []
             for sample in data:
                 prp = sample.properties
-                names.append(sample.name)
-                oc_ff.append(prp.oc_ff)
-                oc_wb.append(prp.oc_wb)
-                oc_nc.append(prp.oc_nc)
-                ec_ff.append(prp.ec_ff)
-                ec_wb.append(prp.ec_wb)
+                if not prp.failed:
+                    names.append(sample.name)
+                    oc_ff.append(prp.oc_ff)
+                    oc_wb.append(prp.oc_wb)
+                    oc_nc.append(prp.oc_nc)
+                    ec_ff.append(prp.ec_ff)
+                    ec_wb.append(prp.ec_wb)
             fig1, ax1 = plt.subplots() 
             ax1.plot(names, oc_ff, '-g', label=r'OC$_{FF}$')
             ax1.plot(names, oc_ff, '.g')
@@ -913,8 +962,8 @@ def run(configuration_file_path):
     failed_fit_count_line = f'N° failed fits:\t{failed_fit_count}\n'
     failed_fit_line = f'Failed fits:\t{failed_fit}\n'
     # Get a list to do statistics on alpha brown
-    list_for_abrc = [d.properties.alpha_brc for d in data]
-    list_for_uabrc = [d.properties.u_alpha_brc for d in data]
+    list_for_abrc = [d.properties.alpha_brc for d in data if not d.properties.failed]
+    list_for_uabrc = [d.properties.u_alpha_brc for d in data if not d.properties.failed]
     avg_alpha, stddev_alpha = average( list_for_abrc), stddev(list_for_abrc)
     alpha_mean_line = f"Average alpha_BrC:\t {round(avg_alpha, 7)}\n"
     alpha_stddev_line = f"Uncertainty (stdev) on alpha_BrC:\t {round(stddev_alpha, 7)}\n"
